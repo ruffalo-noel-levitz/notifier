@@ -10,7 +10,7 @@ namespace ScaleFunder
 {
     public class ScaleFunderAuth
     {
-        public bool VerifyRequest(NameValueCollection dFormParams, string sApiKey, string sSig)
+        public bool VerifyRequestOld(NameValueCollection dFormParams, string sApiKey, string sSig)
         {
             NameValueCollection dParams = new NameValueCollection(dFormParams);
             dParams.Remove("sig");
@@ -19,6 +19,27 @@ namespace ScaleFunder
             Int32 nCompare = System.String.Compare(sDigest, sSig);
             return (nCompare == 0);
         }
+        public bool VerifyRequest(string sAmount, string sDonId, string sApiKey, string sSig)
+        {
+                   
+            string sToSign = this.toSign(sAmount, sDonId);
+            //string sToValidate = this.CollToStr(dParams);
+            string sDigest = this.CalculateDigest(sToSign, sApiKey);
+            Int32 nCompare = System.String.Compare(sDigest, sSig);
+            return (nCompare == 0);
+        }
+        public string toSign(string sAmount, string sDonId)
+        {
+            sAmount = sAmount.Trim();
+            sDonId = sDonId.Trim();
+            return sDonId + "^" + sAmount + "^";
+        }
+        public string ValsToDigest(string sAmount, string sDonID,string sApiKey)
+        {
+            string sToSign = this.toSign(sAmount, sDonID);
+            return this.CalculateDigest(sToSign, sApiKey);
+        }
+
         public string CollToDigest(NameValueCollection oColl, string sApiKey)
         {
             string sConcat = this.CollToStr(oColl);
@@ -53,7 +74,6 @@ namespace ScaleFunder
             string str = BitConverter.ToString(bytes);
             return str.Replace("-","");
         }
-
 	}
         
    }

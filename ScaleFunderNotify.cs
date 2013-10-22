@@ -28,27 +28,42 @@ namespace ScaleFunder
         public string PostURL { get { return _post_url; } set { _post_url = value; } }
         private string _app_key = String.Empty;
         public string AppKey { get { return _app_key; } set { _app_key = value; } }
+        private string _amount = String.Empty;
+        public string Amount { get { return _amount; } set { _amount = value; } }
+        private string _donation_id = String.Empty;
+        public string DonId { get { return _donation_id; } set { _donation_id = value; } }
+        
         private NameValueCollection _params = null;
         public void AddParam(string sKey, string sValue)
         {
             _params.Set(sKey, sValue);
         }
-        public ScaleFunderResponse Post()
+        public ScaleFunderResponse Post() 
         {
-            if (this._post_url == String.Empty || this._app_key == String.Empty || this._params.Count == 0)
+            if (this._post_url == String.Empty || this._app_key == String.Empty || this._params.Count == 0 || this._amount == String.Empty || this._donation_id == String.Empty)
             {
                 throw new ScaleFunderArgsNotSet("ARGS Not Set: AppKey and PostURL must be set, and AddParams must be called at least once");
             }
             ScaleFunderAuth oScaleFunderAuth = new ScaleFunderAuth();
-            string sDigest = oScaleFunderAuth.CollToDigest(this._params, this._app_key);
-            this._params.Set("_sf_sig", sDigest);
+            //string sDigest = oScaleFunderAuth.CollToDigest(this._params, this._app_key);
+            string sDigest = oScaleFunderAuth.ValsToDigest(this.Amount, this.DonId, this.AppKey);
+            this._params.Set("sf_sig", sDigest);
+            this._params.Set("sf_amount", this.Amount);
+            this._params.Set("sf_don_id",this.DonId);
             string sResponseBody;
-            ServicePointManager.CertificatePolicy = new MyCertPolicy();
+            //ServicePointManager.CertificatePolicy = new MyCertPolicy();
 
-            using (WebClient client = new WebClient())
+            try
             {
-                byte[] responsebytes = client.UploadValues(this.PostURL, "POST", this._params);
-                sResponseBody = Encoding.UTF8.GetString(responsebytes);
+                using (WebClient client = new WebClient())
+                {
+                    byte[] responsebytes = client.UploadValues(this.PostURL, "POST", this._params);
+                    sResponseBody = Encoding.UTF8.GetString(responsebytes);
+                }
+            }
+            catch (WebException e)
+            {
+                throw e;
             }
             var jss = new JavaScriptSerializer();
             var dResponse = jss.Deserialize<Dictionary<string, string>>(sResponseBody);
@@ -65,19 +80,20 @@ namespace ScaleFunder
 
         public string GetFinalPing()
         {
-            if (this._post_url == String.Empty || this._app_key == String.Empty || this._params.Count == 0)
+            if (this._post_url == String.Empty || this._app_key == String.Empty || this._params.Count == 0 || this._amount == String.Empty || this._donation_id == String.Empty)
             {
                 throw new ScaleFunderArgsNotSet("ARGS Not Set: AppKey and PostURL must be set, and AddParams must be called at least once");
             }
             ScaleFunderAuth oScaleFunderAuth = new ScaleFunderAuth();
-            string sDigest = oScaleFunderAuth.CollToDigest(this._params, this._app_key);
+            //string sDigest = oScaleFunderAuth.CollToDigest(this._params, this._app_key);
+            string sDigest = oScaleFunderAuth.ValsToDigest(this.Amount, this.DonId, this.AppKey);
             var oQueryDict = HttpUtility.ParseQueryString("");
             foreach (string key in this._params)
             {
                 oQueryDict.Set(key, this._params[key]);
             }
 
-            oQueryDict.Set("_sf_sig", sDigest);
+            oQueryDict.Set("sf_sig", sDigest);
 
 
             return this._post_url + "?" + oQueryDict.ToString();
@@ -96,6 +112,8 @@ namespace ScaleFunder
             System.Runtime.Serialization.StreamingContext context) { }
     }
     
+    
+    /*
     public class MyCertPolicy : System.Net.ICertificatePolicy
     {
         public MyCertPolicy()
@@ -108,7 +126,8 @@ namespace ScaleFunder
             return true;
         }
     }
-     
+    */
+      
 }
 
 
