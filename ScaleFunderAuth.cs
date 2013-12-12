@@ -23,7 +23,6 @@ namespace ScaleFunder
         {
                    
             string sToSign = this.toSign(sAmount, sDonId);
-            //string sToValidate = this.CollToStr(dParams);
             string sDigest = this.CalculateDigest(sToSign, sApiKey);
             Int32 nCompare = System.String.Compare(sDigest, sSig);
             return (nCompare == 0);

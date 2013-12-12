@@ -45,14 +45,13 @@ namespace ScaleFunder
                 throw new ScaleFunderArgsNotSet("ARGS Not Set: AppKey and PostURL must be set, and AddParams must be called at least once");
             }
             ScaleFunderAuth oScaleFunderAuth = new ScaleFunderAuth();
-            //string sDigest = oScaleFunderAuth.CollToDigest(this._params, this._app_key);
+        
             string sDigest = oScaleFunderAuth.ValsToDigest(this.Amount, this.DonId, this.AppKey);
             this._params.Set("sf_sig", sDigest);
             this._params.Set("sf_amount", this.Amount);
             this._params.Set("sf_don_id",this.DonId);
             string sResponseBody;
-            //ServicePointManager.CertificatePolicy = new MyCertPolicy();
-
+          
             try
             {
                 using (WebClient client = new WebClient())
@@ -85,7 +84,6 @@ namespace ScaleFunder
                 throw new ScaleFunderArgsNotSet("ARGS Not Set: AppKey and PostURL must be set, and AddParams must be called at least once");
             }
             ScaleFunderAuth oScaleFunderAuth = new ScaleFunderAuth();
-            //string sDigest = oScaleFunderAuth.CollToDigest(this._params, this._app_key);
             string sDigest = oScaleFunderAuth.ValsToDigest(this.Amount, this.DonId, this.AppKey);
             var oQueryDict = HttpUtility.ParseQueryString("");
             foreach (string key in this._params)
@@ -112,45 +110,7 @@ namespace ScaleFunder
             System.Runtime.Serialization.StreamingContext context) { }
     }
     
-    
-    /*
-    public class MyCertPolicy : System.Net.ICertificatePolicy
-    {
-        public MyCertPolicy()
-        { }
-
-        public bool CheckValidationResult(ServicePoint sp,
-        X509Certificate cert, WebRequest req, int problem)
-        {
-
-            return true;
-        }
-    }
-    */
-      
+        
 }
 
 
-/*
-
-
-ScaleFunder obj;
-
-obj.PostURL = XXXXX
-obj.AppKey = XXXXXXX
-obj.AddParam("CF_Donation_ID","")
-obj.AddParam("Client_Ref","")
-sUrl = obj.GetRequestUrl()
-
-try:
-   oResponse = obj.Post()
-catch {
-
-}
-
-ConnectionTimeout
-
-NoResponseException
-
-ErrorProcessingTransaction
-*/
